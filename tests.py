@@ -47,9 +47,9 @@ class TestDetach(unittest.TestCase):
     def test_daemonize(self):
         """Detach(daemonize=True)"""
         try:
-            with detach.Detach(None, sys.stderr) as d1:
-                if not d1.pid:
-                    with detach.Detach(None, sys.stderr, None, daemonize=True) as d2:
+            with detach.Detach(None, sys.stderr) as d:
+                if not d.pid:
+                    with detach.Detach(None, sys.stderr, None, daemonize=True):
                         pass
                     self.queue.put('parent is still running')
         except SystemExit as e:
