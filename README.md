@@ -2,6 +2,8 @@ Detach
 ======
 Fork and detach the current process.
 
+[![Build Status](https://travis-ci.org/BlueDragonX/detach.svg)](https://travis-ci.org/BlueDragonX/detach)
+
 Usage
 -----
 The `detach` package contains a context manager called `Detach`. It is used
