@@ -6,10 +6,10 @@ import tempfile
 import time
 import unittest
 from collections import deque
-from multiprocessing import Event, Lock, Queue
-from Queue import Empty as QueueEmpty
+from multiprocessing import Event, Queue
 
 parent_pid = os.getpid()
+
 
 def parentonly(func):
     """Only execute the decorated function in the parent thread."""
@@ -65,7 +65,7 @@ class TestDetach(unittest.TestCase):
     def test_daemonize(self):
         """Detach(daemonize=True)"""
         try:
-            with detach.Detach(sys.stdout, sys.stderr, sys.stdin, daemonize=True) as d:
+            with detach.Detach(sys.stdout, sys.stderr, sys.stdin, daemonize=True):
                 pass
             raise Exception("parent did not exist")
         except SystemExit as e:
@@ -75,7 +75,6 @@ class TestDetach(unittest.TestCase):
     def test_close_fds(self):
         """Detach(close_fds=True)"""
         try:
-            want = deque()
             fd = tempfile.NamedTemporaryFile(delete=False)
             with detach.Detach(sys.stdout, sys.stderr, sys.stdin, close_fds=True) as d:
                 if d.pid:
@@ -89,9 +88,9 @@ class TestDetach(unittest.TestCase):
     def test_exclude_fds(self):
         """Detach(close_fds=True, exclude_fds=[fd])"""
         try:
-            want = deque()
             fd = tempfile.NamedTemporaryFile(delete=False)
-            with detach.Detach(sys.stdout, sys.stderr, sys.stdin, close_fds=True, exclude_fds=[fd]) as d:
+            with detach.Detach(sys.stdout, sys.stderr, sys.stdin,
+                               close_fds=True, exclude_fds=[fd]) as d:
                 if d.pid:
                     fd.close()
                 else:
