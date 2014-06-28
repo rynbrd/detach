@@ -25,9 +25,9 @@ class TestDetach(unittest.TestCase):
     @parentonly
     def test_detach(self):
         """Detach()"""
+        fd = tempfile.NamedTemporaryFile(delete=False)
         try:
             want_pid = None
-            fd = tempfile.NamedTemporaryFile(delete=False)
             with detach.Detach(None, sys.stderr, None) as d:
                 if d.pid:
                     want_pid = d.pid
@@ -35,19 +35,21 @@ class TestDetach(unittest.TestCase):
                     pid = os.getpid()
                     fd.write(str(pid))
                     fd.close()
-            time.sleep(0.5)
-            fd.seek(0)
-            have_pid = int(fd.read())
-            fd.close()
-            self.assertEqual(want_pid, have_pid)
         except SystemExit as e:
             self.assertEqual(e.code, 0)
+
+        time.sleep(0.5)
+        fd.seek(0)
+        have_pid = int(fd.read())
+        fd.close()
+        self.assertEqual(want_pid, have_pid)
+        os.unlink(fd.name)
 
     @parentonly
     def test_daemonize(self):
         """Detach(daemonize=True)"""
+        fd = tempfile.NamedTemporaryFile(delete=False)
         try:
-            fd = tempfile.NamedTemporaryFile(delete=False)
             with detach.Detach(None, sys.stderr) as d1:
                 if not d1.pid:
                     with detach.Detach(None, sys.stderr, None, daemonize=True) as d2:
@@ -55,25 +57,28 @@ class TestDetach(unittest.TestCase):
                             fd.close()
                     fd.write('parent is still running')
                     fd.close()
-            time.sleep(0.5)
-            fd.seek(0)
-            self.assertEqual('', fd.read())
         except SystemExit as e:
             self.assertEqual(e.code, 0)
+
+        time.sleep(0.5)
+        fd.seek(0)
+        self.assertEqual('', fd.read())
+        fd.close()
+        os.unlink(fd.name)
 
     @parentonly
     def test_close_fds(self):
         """Detach(close_fds=True)"""
+        fd = tempfile.NamedTemporaryFile(delete=False)
         try:
-            fd = tempfile.NamedTemporaryFile(delete=False)
-
             with detach.Detach(None, sys.stderr, None, close_fds=True) as d:
-                if d.pid:
-                    fd.close()
-                else:
+                if not d.pid:
                     self.assertRaises(IOError, fd.close)
         except SystemExit as e:
             self.assertEqual(e.code, 0)
+
+        fd.close()
+        os.unlink(fd.name)
 
     @parentonly
     def test_exclude_fds(self):
@@ -88,6 +93,8 @@ class TestDetach(unittest.TestCase):
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
+        os.unlink(fd.name)
+
 
 class TestCall(unittest.TestCase):
     """Test `call` function."""
@@ -95,8 +102,8 @@ class TestCall(unittest.TestCase):
     @parentonly
     def test_call(self):
         """call()"""
+        fd = tempfile.NamedTemporaryFile(delete=False)
         try:
-            fd = tempfile.NamedTemporaryFile(delete=False)
             want_pid = detach.call(['bash', '-c', 'echo "$$"'], stdout=fd)
             time.sleep(0.5)
             fd.seek(0)
@@ -105,3 +112,4 @@ class TestCall(unittest.TestCase):
             fd.close()
         except SystemExit as e:
             self.assertEqual(e.code, 0)
+        os.unlink(fd.name)
