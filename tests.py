@@ -65,17 +65,21 @@ class TestDetach(unittest.TestCase):
     def test_daemonize(self):
         """Detach(daemonize=True)"""
         try:
-            with detach.Detach(None, sys.stderr, None, daemonize=True) as d:
-                pass
-            raise Exception("parent did not exist")
+            with detach.Detach(None, sys.stderr) as d1:
+                if not d1.pid:
+                    with detach.Detach(None, sys.stderr, None, daemonize=True) as d2:
+                        pass
+                    self.queue.put('parent is still running')
         except SystemExit as e:
             self.assertEqual(e.code, 0)
+        self.assertTrue(self.queue.empty())
 
     @parentonly
     def test_close_fds(self):
         """Detach(close_fds=True)"""
         try:
             fd = tempfile.NamedTemporaryFile(delete=False)
+
             with detach.Detach(None, sys.stderr, None, close_fds=True) as d:
                 if d.pid:
                     fd.close()
