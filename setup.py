@@ -14,7 +14,7 @@ setup_requires = [
 
 setup(
     name='detach',
-    version='0.1',
+    version='1.0',
     description="Fork and detach the current processe.",
     long_description=readme,
     classifiers=[
