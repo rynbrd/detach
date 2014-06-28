@@ -72,12 +72,13 @@ class TestDetach(unittest.TestCase):
         fd = tempfile.NamedTemporaryFile(delete=False)
         try:
             with detach.Detach(None, sys.stderr, None, close_fds=True) as d:
-                if not d.pid:
+                if d.pid:
+                    fd.close()
+                else:
                     self.assertRaises(IOError, fd.close)
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
-        fd.close()
         os.unlink(fd.name)
 
     @parentonly
