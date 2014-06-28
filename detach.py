@@ -122,9 +122,11 @@ def call(args, stdout=None, stderr=None, stdin=None, daemonize=False,
     pid = os.fork()
     if pid > 0:
         os.waitpid(pid, 0)
+        child_pid = shared_pid.value
+        del shared_pid
         if daemonize:
             sys.exit(0)
-        return shared_pid.value
+        return child_pid
     else:
         os.setsid()
         proc = subprocess.Popen(args, stdout=stdout, stderr=stderr, stdin=stdin, close_fds=True,
