@@ -2,6 +2,7 @@
 import errno
 import os
 import resource
+import subprocess
 import sys
 import traceback
 from multiprocessing import Value
@@ -72,7 +73,6 @@ class Detach(object):
 
     def __enter__(self):
         """Fork and detach the process."""
-
         pid = os.fork()
         if pid > 0:
             # parent
@@ -102,3 +102,32 @@ class Detach(object):
             if exc_val:
                 traceback.print_exception(exc_cls, exc_val, exc_tb)
             sys.exit(0)
+
+
+def call(args, stdout=None, stderr=None, stdin=None, daemonize=False,
+         preexec_fn=None, shell=False, cwd=None, env=None):
+    """
+    Run an external command in a separate process and detach it from the current process. Excepting
+    `stdout`, `stderr`, and `stdin` all file descriptors are closed after forking. If `daemonize`
+    is True then the parent process exits. All stdio is redirected to `os.devnull` unless
+    specified. The `preexec_fn`, `shell`, `cwd`, and `env` parameters are the same as their `Popen`
+    counterparts. Return the PID of the child process if not daemonized.
+    """
+    stream = lambda s, m: s is None and os.open(os.devnull, m) or s
+    stdout = stream(stdout, os.O_WRONLY)
+    stderr = stream(stderr, os.O_WRONLY)
+    stdin = stream(stdin, os.O_RDONLY)
+
+    shared_pid = Value('i', 0)
+    pid = os.fork()
+    if pid > 0:
+        os.waitpid(pid, 0)
+        if daemonize:
+            sys.exit(0)
+        return shared_pid.value
+    else:
+        os.setsid()
+        proc = subprocess.Popen(args, stdout=stdout, stderr=stderr, stdin=stdin, close_fds=True,
+                                preexec_fn=preexec_fn, shell=shell, cwd=cwd, env=env)
+        shared_pid.value = proc.pid
+        sys.exit(0)
