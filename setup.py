@@ -8,6 +8,10 @@ try:
 except IOError:
     readme = ''
 
+setup_requires = [
+    'nose>=1.3.0',
+]
+
 setup(
     name='detach',
     version='0.1',
@@ -26,4 +30,6 @@ setup(
     url='https://github.com/bluedragonx/detach',
     license='BSD-derived',
     py_modules=['detach'],
+    setup_requires=setup_requires,
+    test_suite = 'nose.collector',
 )
