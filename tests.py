@@ -70,16 +70,25 @@ class TestDetach(unittest.TestCase):
     def test_close_fds(self):
         """Detach(close_fds=True)"""
         fd = tempfile.NamedTemporaryFile(delete=False)
+        testfd = tempfile.NamedTemporaryFile(delete=False)
         try:
-            with detach.Detach(None, sys.stderr, None, close_fds=True) as d:
+            with detach.Detach(None, sys.stderr, None, close_fds=True, exclude_fds=[fd]) as d:
                 if d.pid:
-                    fd.close()
+                    testfd.close()
                 else:
-                    self.assertRaises(IOError, fd.close)
+                    try:
+                        testfd.close()
+                    except IOError as e:
+                        fd.write(str(e.errno))
+                        fd.close()
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
+        time.sleep(0.5)
+        fd.seek(0)
+        self.assertEqual(9, int(fd.read()))
         os.unlink(fd.name)
+        os.unlink(testfd.name)
 
     @parentonly
     def test_exclude_fds(self):
