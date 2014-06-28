@@ -22,7 +22,7 @@ Examples
 --------
 ### Simple Fork with STDOUT
 
-    import os, detach
+    import detach, os, sys
 
     with detach.Detach(sys.stdout) as d:
         if d.pid:
@@ -32,7 +32,7 @@ Examples
 
 ### Daemonize 
 
-    import os, detach
+    import detach
     from your_app import main
 
     def main():
@@ -40,9 +40,16 @@ Examples
 
     with detach.Detach(daemonize=True) as d:
         if d.pid:
-            print("started process in background")
+            print("started process {} in background".format(pid))
         else:
             main()
+
+### Call External Command
+
+    import detach, sys
+    pid = detach.call(['bash', '-c', 'echo "my pid is $$"'], stdout=sys.stdout)
+    print("running external command {}".format(pid)) 
+    
 
 License
 -------
