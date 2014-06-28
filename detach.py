@@ -34,7 +34,7 @@ class Detach(object):
         self.shared_pid = Value('i', 0)
 
         for item in list(exclude_fds or []) + [stdout, stderr, stdin]:
-            if isinstance(item, file):
+            if hasattr(item, 'fileno'):
                 item = item.fileno()
             self.exclude_fds.add(item)
 
