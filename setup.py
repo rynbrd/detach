@@ -8,11 +8,6 @@ try:
 except IOError:
     readme = ''
 
-setup_requires = [
-    'coverage>=3.7.0',
-    'nose>=1.3.0',
-]
-
 setup(
     name='detach',
     version='0.1',
@@ -30,10 +25,5 @@ setup(
     author_email='bluedragonx@gmail.com',
     url='https://github.com/bluedragonx/detach',
     license='BSD-derived',
-    zip_safe=False,
     py_modules=['detach'],
-    include_package_data=True,
-    setup_requires=setup_requires,
-    test_suite = 'nose.collector',
-    entry_points='',
 )
