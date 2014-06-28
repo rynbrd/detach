@@ -5,8 +5,6 @@ import sys
 import tempfile
 import time
 import unittest
-from collections import deque
-from multiprocessing import Event, Queue
 
 parent_pid = os.getpid()
 
@@ -24,40 +22,24 @@ def parentonly(func):
 class TestDetach(unittest.TestCase):
     """Test the `Dispatch` class."""
 
-    def setUp(self):
-        self.queue = Queue()
-        self.put_event = Event()
-
-    def put(self, item):
-        """Put an item to the internal queue."""
-        self.queue.put(item)
-
-    def put_done(self):
-        """Notify when all puts are complete."""
-        self.put_event.set()
-
-    def assertQueue(self, want, msg=None, timeout=2):
-        """Drain the queue and compare its contents to want."""
-        items = []
-        self.assertTrue(self.put_event.wait(timeout))
-        time.sleep(0.5)
-        while not self.queue.empty():
-            items.append(self.queue.get())
-        self.assertEqual(items, list(want), msg)
-
     @parentonly
     def test_detach(self):
         """Detach()"""
         try:
-            want = deque()
+            want_pid = None
+            fd = tempfile.NamedTemporaryFile(delete=False)
             with detach.Detach(None, sys.stderr, None) as d:
                 if d.pid:
-                    want.append(d.pid)
+                    want_pid = d.pid
                 else:
                     pid = os.getpid()
-                    self.put(pid)
-                    self.put_done()
-            self.assertQueue(want)
+                    fd.write(str(pid))
+                    fd.close()
+            time.sleep(0.5)
+            fd.seek(0)
+            have_pid = int(fd.read())
+            fd.close()
+            self.assertEqual(want_pid, have_pid)
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
