@@ -101,7 +101,7 @@ class Detach(object):
         if self.daemonize or not self.pid:
             if exc_val:
                 traceback.print_exception(exc_cls, exc_val, exc_tb)
-            sys.exit(0)
+            os._exit(0)
 
 
 def call(args, stdout=None, stderr=None, stdin=None, daemonize=False,
@@ -130,4 +130,4 @@ def call(args, stdout=None, stderr=None, stdin=None, daemonize=False,
         proc = subprocess.Popen(args, stdout=stdout, stderr=stderr, stdin=stdin, close_fds=True,
                                 preexec_fn=preexec_fn, shell=shell, cwd=cwd, env=env)
         shared_pid.value = proc.pid
-        sys.exit(0)
+        os._exit(0)
