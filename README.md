@@ -7,7 +7,7 @@ Fork and detach the current process.
 Usage
 -----
 The `detach` package contains a context manager called `Detach`. It is used
-with with `with` statement to fork the current process and execute code in that
+with `with` statement to fork the current process and execute code in that
 process. The child process exits when the context manager exits. The following
 parameters may be passed to `Detach` to change its behavior:
 
