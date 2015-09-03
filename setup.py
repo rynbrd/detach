@@ -25,6 +25,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.4",
         "License :: OSI Approved :: BSD License",
+        "Topic :: Utilities",
     ],
     keywords='fork daemon detach',
     author='Ryan Bourgeois',
