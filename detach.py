@@ -51,7 +51,7 @@ class Detach(object):
         """Close a file descriptor if it is open."""
         try:
             os.close(fd)
-        except OSError, exc:
+        except OSError as exc:
             if exc.errno != errno.EBADF:
                 msg = "Failed to close file descriptor {}: {}".format(fd, exc)
                 raise Error(msg)
