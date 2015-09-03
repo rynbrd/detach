@@ -33,7 +33,7 @@ class TestDetach(unittest.TestCase):
                     want_pid = d.pid
                 else:
                     pid = os.getpid()
-                    fd.write(str(pid))
+                    fd.write(str(pid).encode())
                     fd.close()
         except SystemExit as e:
             self.assertEqual(e.code, 0)
@@ -62,7 +62,7 @@ class TestDetach(unittest.TestCase):
 
         time.sleep(0.5)
         fd.seek(0)
-        self.assertEqual('', fd.read())
+        self.assertEqual('', fd.read().decode())
         fd.close()
         os.unlink(fd.name)
 
@@ -79,7 +79,7 @@ class TestDetach(unittest.TestCase):
                     try:
                         testfd.close()
                     except IOError as e:
-                        fd.write(str(e.errno))
+                        fd.write(str(e.errno).encode())
                         fd.close()
         except SystemExit as e:
             self.assertEqual(e.code, 0)
